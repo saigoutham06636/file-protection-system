@@ -87,13 +87,22 @@ def _rotation_loop():
         time.sleep(1)
 
 
-def start_rotation_service():
-    thread = threading.Thread(target=_rotation_loop, daemon=True)
-    thread.start()
-    print("Rotation thread started")
+_rotation_thread = None
+_rotation_lock = threading.Lock()
+
+def ensure_rotation_running():
+    global _rotation_thread
+    if _rotation_thread is None or not _rotation_thread.is_alive():
+        with _rotation_lock:
+            if _rotation_thread is None or not _rotation_thread.is_alive():
+                print("Starting key rotation thread...")
+                _rotation_thread = threading.Thread(target=_rotation_loop, daemon=True)
+                _rotation_thread.start()
 
 
-start_rotation_service()
+@app.before_request
+def start_rotation():
+    ensure_rotation_running()
 
 @app.route("/")
 def index():
@@ -220,6 +229,7 @@ def decrypt_route():
 if __name__ == "__main__":
     # Debug mode is fine for development / academic project.
     app.run(host="0.0.0.0", port=5000)
+
 
 
 
