@@ -85,11 +85,9 @@ def _rotation_loop():
         time.sleep(1)
 
 
-@app.before_first_request
-def start_rotation():
-    print("Starting key rotation service...")
-    thread = threading.Thread(target=_rotation_loop, daemon=True)
-    thread.start()
+# Start key rotation thread when the server starts
+rotation_thread = threading.Thread(target=_rotation_loop, daemon=True)
+rotation_thread.start()
 
 @app.route("/")
 def index():
@@ -216,6 +214,7 @@ def decrypt_route():
 if __name__ == "__main__":
     # Debug mode is fine for development / academic project.
     app.run(host="0.0.0.0", port=5000)
+
 
 
 
