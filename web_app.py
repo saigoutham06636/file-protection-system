@@ -37,10 +37,17 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key")  # for fla
 email_profiles = load_email_profiles()
 rotation_interval = load_rotation_interval(default=30)
 
-# Current email settings; set only from the web UI.
+# Load default email settings from config.json
 current_sender_email = None
 current_sender_password = None
 current_recipient_email = None
+
+if email_profiles:
+    profile = email_profiles[0]
+    current_sender_email = profile.sender_email
+    current_sender_password = profile.sender_password
+    if profile.recipients:
+        current_recipient_email = profile.recipients[0]
 
 key_manager = KeyRotationManager(
     interval_seconds=rotation_interval,
@@ -229,6 +236,7 @@ def decrypt_route():
 if __name__ == "__main__":
     # Debug mode is fine for development / academic project.
     app.run(host="0.0.0.0", port=5000)
+
 
 
 
