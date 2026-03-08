@@ -34,6 +34,8 @@ def load_rotation_interval(default: int = 30) -> int:
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key")  # for flash messages / demo
 
+rotation_started = False
+
 email_profiles = load_email_profiles()
 rotation_interval = load_rotation_interval(default=30)
 
@@ -87,8 +89,14 @@ def _rotation_loop():
         time.sleep(1)
 
 
-rotation_thread = threading.Thread(target=_rotation_loop, daemon=True)
-rotation_thread.start()
+@app.before_request
+def start_rotation():
+    global rotation_started
+
+    if not rotation_started:
+        rotation_started = True
+        thread = threading.Thread(target=_rotation_loop, daemon=True)
+        thread.start()
 
 @app.route("/")
 def index():
@@ -215,6 +223,7 @@ def decrypt_route():
 if __name__ == "__main__":
     # Debug mode is fine for development / academic project.
     app.run(host="0.0.0.0", port=5000)
+
 
 
 
