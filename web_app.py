@@ -76,17 +76,20 @@ key_manager.start()
 
 
 def _rotation_loop():
-    """Background loop to drive time-based key rotation independently of HTTP requests."""
     while True:
         try:
             key_manager.tick()
-        except Exception:
-            # In a real system, log this somewhere persistent.
-            pass
+        except Exception as e:
+            print("[Rotation Error]", e)
+
         time.sleep(1)
 
 
-threading.Thread(target=_rotation_loop, daemon=True).start()
+@app.before_first_request
+def start_rotation():
+    print("Starting key rotation service...")
+    thread = threading.Thread(target=_rotation_loop, daemon=True)
+    thread.start()
 
 
 @app.route("/")
@@ -214,4 +217,5 @@ def decrypt_route():
 if __name__ == "__main__":
     # Debug mode is fine for development / academic project.
     app.run(host="0.0.0.0", port=5000)
+
 
