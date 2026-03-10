@@ -79,11 +79,11 @@ def on_tick(password: str, seconds_left: int) -> None:
 
 key_manager.on_new_password = on_new_password
 key_manager.on_tick = on_tick
-key_manager.start()
 
 
 def _rotation_loop():
     print("Key rotation service started")
+    key_manager.start()  # <--- Moved here!
 
     while True:
         try:
