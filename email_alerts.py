@@ -95,10 +95,14 @@ def _send_key_email_sync(config: EmailConfig, password: str) -> None:
                 server.send_message(msg)
     except smtplib.SMTPAuthenticationError as e:
         # Authentication failure (e.g., wrong password or provider blocking login)
-        print(f"[Email:{config.name}] Authentication failed while sending key email:", e)
+        print(f"[Email:{config.name}] Authentication failed while sending key email: {e}")
     except Exception as e:
         # Any other email-related error
-        print(f"[Email:{config.name}] Failed to send key email:", e)
+        print(f"[Email:{config.name}] Failed to send key email: {e}")
+        import traceback
+        traceback.print_exc()
+        
+    print(f"[Email:{config.name}] Finished attempt to send email to {config.recipients}")
 
 
 def send_key_email_async(config: EmailConfig, password: str) -> None:
